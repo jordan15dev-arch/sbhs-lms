@@ -17,6 +17,8 @@ import { prisma } from "./prisma";
  * `lib/auth-client.ts` and its UI plugin in `components/providers.tsx`.
  */
 export const auth = betterAuth({
+  // Explicit so OAuth redirect URLs never depend on auto-detection.
+  baseURL: process.env.BETTER_AUTH_URL,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -28,10 +30,6 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-    },
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID ?? "",
-      clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
     },
   },
   user: {
