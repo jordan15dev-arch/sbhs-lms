@@ -3,6 +3,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
 import { headers } from "next/headers"
 import Link from "next/link"
 import { redirect } from "next/navigation"
+import { connection } from "next/server"
 
 import { auth } from "@/lib/auth"
 import { getQueryClient } from "@/lib/query-client"
@@ -12,6 +13,10 @@ import { getQueryClient } from "@/lib/query-client"
 export const instant = false
 
 export default async function Dashboard() {
+  // The session check reads the clock (token expiry), which is unstable
+  // during prerendering — stop the static shell here.
+  await connection()
+
   const queryClient = getQueryClient()
 
   const session = await ensureSessionServer(queryClient, auth, {

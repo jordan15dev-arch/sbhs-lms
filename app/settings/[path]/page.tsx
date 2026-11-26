@@ -3,6 +3,7 @@ import { ensureSessionServer } from "@better-auth-ui/core/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import { connection } from "next/server";
 
 import { Settings } from "@/components/auth/settings/settings";
 import { auth } from "@/lib/auth";
@@ -30,6 +31,10 @@ export default async function SettingsPage({
   if (!validSettingsPaths.has(path)) {
     notFound();
   }
+
+  // The session check reads the clock (token expiry), which is unstable
+  // during prerendering — stop the static shell here.
+  await connection();
 
   const requestHeaders = await headers();
   const queryClient = getQueryClient();
