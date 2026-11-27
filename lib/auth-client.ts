@@ -1,11 +1,13 @@
 import { apiKeyClient } from "@better-auth/api-key/client";
 import { passkeyClient } from "@better-auth/passkey/client";
 import {
+  adminClient,
   magicLinkClient,
   multiSessionClient,
   organizationClient,
   usernameClient,
 } from "better-auth/client/plugins";
+import { adminAc, userAc } from "better-auth/plugins/admin/access";
 import { createAuthClient } from "better-auth/react";
 
 /**
@@ -22,5 +24,14 @@ export const authClient = createAuthClient({
     apiKeyClient(),
     multiSessionClient(),
     organizationClient(),
+    // Roles must match `admin()` in `lib/auth.ts` so session user.role types
+    // infer as "teacher" | "student" | "admin" on the client too.
+    adminClient({
+      roles: {
+        teacher: userAc,
+        student: userAc,
+        admin: adminAc,
+      },
+    }),
   ],
 });

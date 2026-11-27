@@ -3,11 +3,13 @@ import { passkey } from "@better-auth/passkey";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import {
+  admin,
   magicLink,
   multiSession,
   organization,
   username,
 } from "better-auth/plugins";
+import { adminAc, userAc } from "better-auth/plugins/admin/access";
 import { prisma } from "./prisma";
 
 /**
@@ -37,6 +39,23 @@ export const auth = betterAuth({
       enabled: true,
     },
   },
+  // Self-registered users start with no role; `app/onboarding/role` asks for
+  // teacher/student. Only an admin (or scripts/set-role.ts) can grant "admin".
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user, ctx) => {
+          // The admin plugin below stamps every new user with `defaultRole`.
+          // Keep that only for users created through the admin API — clear it
+          // for sign-ups so onboarding can ask for the role.
+          if (ctx?.path === "/admin/create-user") {
+            return;
+          }
+          return { data: { role: null } };
+        },
+      },
+    },
+  },
   plugins: [
     username(),
     magicLink({
@@ -52,5 +71,14 @@ export const auth = betterAuth({
     ]),
     multiSession(),
     organization(),
+    admin({
+      defaultRole: "student",
+      adminRoles: ["admin"],
+      roles: {
+        teacher: userAc,
+        student: userAc,
+        admin: adminAc,
+      },
+    }),
   ],
 });

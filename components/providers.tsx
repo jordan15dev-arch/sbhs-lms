@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import type { ReactNode } from "react"
 import { apiKeyPlugin } from "@/lib/auth/api-key-plugin"
+import { adminPlugin } from "@/lib/auth/admin-plugin"
 import { deleteUserPlugin } from "@/lib/auth/delete-user-plugin"
 import { magicLinkPlugin } from "@/lib/auth/magic-link-plugin"
 import { multiSessionPlugin } from "@/lib/auth/multi-session-plugin"
@@ -52,6 +53,12 @@ export function Providers({ children }: { children: ReactNode }) {
           themePlugin({ useTheme }),
           multiSessionPlugin(),
           deleteUserPlugin(),
+          adminPlugin({
+            adminRoles: ["admin"],
+            allowMultipleRoles: false,
+            defaultRole: "student",
+            roles: ["teacher", "student", "admin"]
+          }),
           organizationPlugin({
             slugPrefix: "@",
             slug

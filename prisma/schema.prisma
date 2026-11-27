@@ -25,6 +25,12 @@ model User {
   username        String?      @unique
   displayUsername String?
 
+  // Better Auth admin plugin: null until the user picks teacher/student.
+  role       String?
+  banned     Boolean    @default(false)
+  banReason  String?
+  banExpires DateTime?
+
   sessions    Session[]
   accounts    Account[]
   passkeys    Passkey[]
@@ -42,6 +48,7 @@ model Session {
   userAgent            String?
   userId               String
   activeOrganizationId String?
+  impersonatedBy       String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
